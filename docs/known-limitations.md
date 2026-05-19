@@ -19,10 +19,6 @@ bundler-agnostic; the default flips when the tickets close — no rewrite.
 the App Router. The Pages Router, non-Next frameworks, and non-Tailwind styling
 systems are out of scope for v1.
 
-**Direct manipulation only.** v1 has no AI agent. The protocol reserves an
-agent tier (Tier D), but v1 is the direct click-to-source foundation — get that
-loop trustworthy first.
-
 ## Distribution
 
 **Not published to npm.** v1 runs from the cloned repository. Using Specula in

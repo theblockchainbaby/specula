@@ -44,5 +44,5 @@ Total: ~82s. Trim shots 0:40–0:52 or 0:52–1:04 to land at 60s.
 
 - Error/rollback states — true, but not the launch story; save for docs.
 - The daemon internals or the protocol — that's `docs/how-it-works.md`.
-- Anything aspirational (an AI agent, other frameworks). Demo only what v1
-  actually does today.
+- Anything not built yet, or other frameworks. Demo only what v1 actually
+  does today.

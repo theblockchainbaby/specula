@@ -120,10 +120,3 @@ Refresh redraw — fast enough that an optimistic patch is not worth the risk.
 - The daemon serves the overlay bundle itself, at `GET /specula.js`, with the
   port and token baked in — which is why one dev-only `<script>` tag in your
   layout is the whole browser-side install.
-
-## Where it is going
-
-The protocol reserves an agent tier (Tier D) and a verb vocabulary beyond v1.
-v1 is the direct-manipulation foundation: get the click-to-source loop correct
-and trustworthy first. The full protocol is in
-[`specs/protocol.md`](../specs/protocol.md).

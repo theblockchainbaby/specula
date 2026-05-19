@@ -1,14 +1,17 @@
-# Specula — visual editing that commits to your source
+# Specula
 
-*v1.0.0-alpha. An honest alpha — it needs strangers to try to break it.*
+**Specula is a visual source editor for Next.js. Click a live page. Edit the
+real source. Keep the diff tiny.**
+
+*v1.0.0-alpha — an honest alpha. It needs strangers to try to break it.*
 
 Visual editors for real codebases tend to fail one of two ways. Either they
-**export** code — a one-way door; the moment you touch the export by hand, the
-tool can't help you again. Or they keep their **own state** — a model layered
-over your app, and now you have two sources of truth that drift.
+**export** code — a one-way door; touch the export by hand and the tool can't
+help you again. Or they keep their **own state** — a model layered over your
+app, and now you have two sources of truth that drift.
 
-Specula is neither. It treats the rendered DOM and your source AST as two views
-of one thing, and keeps your codebase as the single source of truth.
+Specula is neither. It treats the rendered DOM and your source as two views of
+one thing, and keeps your codebase as the single source of truth.
 
 You run your Next.js app. You click an element in the browser. You change its
 text, its Tailwind classes, a style, or swap an image — and Specula writes that
@@ -16,7 +19,7 @@ change back to your actual `.tsx` file as a **minimal diff**: only the bytes you
 changed move. Formatting, comments, every other line — untouched. Then you
 commit it like any other edit, because it *is* one.
 
-## What it's actually built around: trust
+## What it's built around: trust
 
 A tool that edits your source has one job it cannot fail — it must never
 quietly corrupt a file. So Specula's design starts from the failure mode, not
@@ -52,17 +55,15 @@ transaction.
 
 ## What v1 is — and isn't
 
-v1 does eight verbs, end to end and verified: **edit text, set classes, set a
-style, replace an asset** (optimistic), and **delete, duplicate, wrap, move**
-(structural). That is the whole feature surface, deliberately. A tool that does
-eight things without silent failure beats one that does forty with a 5%
-corruption rate.
+v1 does eight edits, end to end and verified: **edit text, set classes, set a
+style, replace an asset**, and **delete, duplicate, wrap, move**. That is the
+whole surface, deliberately — a tool that does eight things without silent
+failure beats one that does forty with a 5% corruption rate.
 
 It is also honest about its edges. v1 targets **Webpack + Next.js 16 App Router
-+ Tailwind**. There is no AI agent yet — v1 is direct manipulation, the
-trustworthy foundation first. It builds from source (you need Rust) and is not
-on npm yet. The full list is in [known-limitations.md](known-limitations.md) —
-read it; it is the honest version.
++ Tailwind**. It builds from source (you need Rust) and is not on npm yet. The
+full list is in [known-limitations.md](known-limitations.md) — read it; it is
+the honest version.
 
 ## Try it
 
@@ -78,13 +79,11 @@ Open the printed URL, click the heading, edit it — then look at
 ## The ask
 
 v1 is feature-complete and verified — but verified-by-me is not trusted-by-you.
-What an alpha needs now is strangers: your real Next.js project, your real
+What this needs now is strangers: your real Next.js project, your real
 components, your weird JSX, trying to break the source-edit guarantee.
 
 If you will do that — [join the alpha](alpha.md). It is small on purpose.
 
 ---
 
-*Built in the open. The contracts it is built against are frozen in
-[`specs/`](../specs/); how the loop works is in
-[how-it-works.md](how-it-works.md).*
+*Built in the open. How the loop works: [how-it-works.md](how-it-works.md).*

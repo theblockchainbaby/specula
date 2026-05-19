@@ -1,6 +1,7 @@
 # Specula
 
-**Visual editing for a real Next.js codebase — the code stays the source of truth.**
+**Specula is a visual source editor for Next.js. Click a live page. Edit the
+real source. Keep the diff tiny.**
 
 Click an element in your running app. Edit its text, its Tailwind classes, an
 inline style, or swap an image. Specula writes the change back to your source
