@@ -113,20 +113,31 @@ Aggregates to compute:
 - **Trust** = `Y` ÷ (testers who reached a diff).
 - **Use again** = `Y` ÷ total.
 
-## Reading the result
+## Reading the result — the gate
 
-- **Trust ≥ 90% and install ≥ 75%** — the core claim holds. If `use again` also
-  shows real pull, widen carefully to a second wave.
-- **Trust below the line** — STOP. Trust is the product. Fix the diff and the
-  transaction before another tester is invited; nothing else matters until it
-  is back over the line.
-- **Install is the dominant failure point** — the install path is v1.1
-  priority #1.
-- **Trust holds but `use again` is weak** — Specula works and is trusted but
-  doesn't pull. The gap is who it's for and why they'd reach for it — a
-  sharper target, not more capability.
-- **The first-failure histogram** — the ranked v1.1 backlog, whatever it
-  contains.
+One of three calls, made on the aggregates.
+
+**🟢 Green — the core idea works; widen.**
+All four hold: install ≥ 75% · median first edit < 5 min · trust ≥ 90% ·
+reuse ≥ 50%. Recruit the next wave.
+
+**🟡 Yellow — it works, but it's rough.**
+Testers succeed but struggle — install drags, the UI confuses, the loop is
+slow. Trust still holds. Fix onboarding and UX before widening; do not add
+capability.
+
+**🔴 Red — trust failed.**
+Developers hesitate over the resulting diff, or wouldn't merge it as-is. Pause
+recruiting. Repair trust — the diff, the transaction — before another tester
+sees it.
+
+Trust is the gate. A developer who inspects the change and immediately thinks
+*"yes, I'd merge this"* is the whole product working. If they don't, no amount
+of functionality fixes it — so trust is repaired first, alone, before anything
+else. With a cohort this small, treat the percentages as directional: a single
+"no" on trust is not a rounding error — it is a reason to find out exactly why.
+
+The first-failure histogram is the ranked fix list, whatever the light.
 
 ## Running it
 
