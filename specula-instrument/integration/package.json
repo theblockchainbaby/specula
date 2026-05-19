@@ -1,0 +1,13 @@
+{
+  "name": "specula-integration",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Isolation test: run the Specula SWC plugin through @swc/core.",
+  "scripts": {
+    "test": "node run.mjs"
+  },
+  "dependencies": {
+    "@swc/core": "1.15.33"
+  }
+}

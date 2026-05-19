@@ -1,0 +1,23 @@
+{
+  "name": "specula-workspace",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Specula — a bidirectional bridge between rendered DOM and source AST.",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "setup": "npm install && npm run build",
+    "build": "npm run build:instrument && npm run build:overlay",
+    "build:instrument": "cd specula-instrument && cargo build --release -p specula-analyze -p specula-edit && cargo build --release --target wasm32-wasip1 -p specula-swc-plugin",
+    "build:overlay": "npm run build --workspace @specula/overlay",
+    "dev": "node packages/cli/bin/specula.mjs dev apps/playground",
+    "test": "npm run test:instrument && npm run test:daemon && npm run test:overlay && npm run test:cli",
+    "test:instrument": "cd specula-instrument && cargo test",
+    "test:daemon": "npm test --workspace @specula/daemon",
+    "test:overlay": "npm test --workspace @specula/overlay",
+    "test:cli": "npm test --workspace specula",
+    "typecheck": "npm run typecheck --workspace @specula/daemon && npm run typecheck --workspace @specula/overlay"
+  }
+}

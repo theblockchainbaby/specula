@@ -1,0 +1,14 @@
+[package]
+name = "specula-swc-plugin"
+description = "Specula SWC plugin — `transform` mode entry point, compiled to wasm32-wasip1."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+specula-core = { path = "../specula-core" }
+swc_core = { version = "66.0.2", features = ["ecma_plugin_transform", "ecma_ast", "ecma_visit"] }
+serde_json = "1"

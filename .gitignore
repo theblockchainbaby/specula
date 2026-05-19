@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# build output
+.next/
+dist/
+target/
+
+# generated / runtime
+.specula/
+.swc/
+next-env.d.ts
+
+# media — host launch videos elsewhere, don't commit them
+*.webm
+
+# os / logs
+.DS_Store
+*.log

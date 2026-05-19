@@ -1,0 +1,19 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/specula-core",
+  "crates/specula-swc-plugin",
+  "crates/specula-analyze",
+  "crates/specula-edit",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+license = "MIT"
+
+# Plugin wasm builds want a small, predictable artifact.
+[profile.release]
+lto = true
+opt-level = "s"
+strip = true

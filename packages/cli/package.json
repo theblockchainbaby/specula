@@ -1,0 +1,13 @@
+{
+  "name": "specula",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "description": "Specula CLI — visual editing for a Next.js codebase.",
+  "bin": {
+    "specula": "bin/specula.mjs"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mjs"
+  }
+}

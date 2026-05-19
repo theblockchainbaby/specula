@@ -1,0 +1,22 @@
+{
+  "name": "specula-playground",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Minimal Next.js 16 app for verifying the Specula SWC plugin end to end.",
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start",
+    "verify": "next build --webpack && node verify.mjs"
+  },
+  "dependencies": {
+    "next": "16.2.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "25.8.0",
+    "@types/react": "19.2.14",
+    "typescript": "6.0.3"
+  }
+}
