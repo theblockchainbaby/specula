@@ -8,6 +8,12 @@ inline style, or swap an image. Specula writes the change back to your source
 files as a *minimal diff* — only the bytes you changed move; formatting,
 comments, and every other line are preserved exactly.
 
+## Alpha
+
+Specula is in `v1.0.0-alpha`. I am looking for Next.js developers to try the demo, make a few edits, inspect the Git diff, and tell me whether they would trust the result.
+
+Start with the demo below. If the source diff feels wrong, confusing, or unsafe, that is the most valuable feedback.
+
 It is not a design tool that exports code, and not a no-code layer that owns a
 separate state. The rendered DOM and the source AST are two views of one
 thing; Specula is the bridge between them.
@@ -27,12 +33,12 @@ guarantee is built on.
 ## What v1 does
 
 | Edit | Verb | How it lands |
-| --- | --- | --- |
-| Change text | `edit-text` | optimistic patch, then committed to source |
+|---|---|---|
+| Change text | `edit-text` | Optimistic patch, then committed to source |
 | Add / remove classes | `set-class` | Tailwind-merged, optimistic, committed |
-| Set a style property | `set-style` | lowered to a Tailwind arbitrary class |
-| Swap an image | `replace-asset` | upload written under `public/` |
-| Delete / duplicate / wrap / move | structural | committed; Fast Refresh re-renders |
+| Set a style property | `set-style` | Lowered to a Tailwind arbitrary class |
+| Swap an image | `replace-asset` | Upload written under `public/` |
+| Delete / duplicate / wrap / move | Structural verbs | Committed; Fast Refresh re-renders |
 
 Property edits (the first four) are **Tier A**: the overlay patches the DOM the
 instant the daemon acknowledges, so the change is visible with zero latency
@@ -110,13 +116,13 @@ and tells you exactly what is missing if either is absent.
 ## Repository layout
 
 | Path | What it is |
-| --- | --- |
-| [`specs/`](specs/) | The three frozen v1 contracts — identity, protocol, verification. |
-| [`specula-instrument/`](specula-instrument/) | Rust: the SWC plugin (instruments JSX) and the `analyze` / `edit` CLIs. One path algorithm, used by both the bundler and the daemon. |
-| [`packages/daemon/`](packages/daemon/) | The daemon — owns the project, runs the transaction lifecycle, speaks the intent protocol. |
-| [`packages/overlay/`](packages/overlay/) | The browser overlay — hit-testing, the selection ladder, the inspector, intent emission. |
-| [`packages/cli/`](packages/cli/) | The `specula` command. |
-| [`apps/playground/`](apps/playground/) | The demo Next.js 16 app. |
+|---|---|
+| `specs/` | The three frozen v1 contracts — identity, protocol, verification |
+| `specula-instrument/` | Rust SWC plugin and `analyze` / `edit` CLIs |
+| `packages/daemon/` | Transaction lifecycle daemon |
+| `packages/overlay/` | Browser overlay, hit-testing, selection ladder, inspector |
+| `packages/cli/` | The `specula` command |
+| `apps/playground/` | Demo Next.js 16 app |
 
 ## Documentation
 
