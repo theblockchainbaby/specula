@@ -68,7 +68,7 @@ the honest version.
 ## Try it
 
 ```sh
-git clone <repo> && cd specula
+git clone https://github.com/theblockchainbaby/specula.git && cd specula
 npm run setup     # installs deps, builds the Rust + overlay artifacts
 npm run dev       # starts the bundled demo with Specula live
 ```

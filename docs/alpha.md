@@ -20,8 +20,7 @@ The best testers already think *"here's how I'd break it."*
 
 One hands-on session: install Specula, make a few real edits to a real page,
 read the `git diff`, and answer five short questions. That's it — about an hour,
-self-paced. How the session runs and what is measured is in
-[alpha-experiment.md](alpha-experiment.md).
+self-paced.
 
 In return: the repo and a setup walkthrough, a direct line for bugs — especially
 any edit that lands wrong in source — and a say in what gets fixed first.

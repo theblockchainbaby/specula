@@ -14,6 +14,12 @@ next-env.d.ts
 # media — host launch videos elsewhere, don't commit them
 *.webm
 
+# alpha operator docs — kept local, not in the public repo
+docs/alpha-recruitment.md
+docs/alpha-runbook.md
+docs/alpha-experiment.md
+docs/demo-script.md
+
 # os / logs
 .DS_Store
 *.log
