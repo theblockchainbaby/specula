@@ -82,7 +82,7 @@ v1 is feature-complete and verified — but verified-by-me is not trusted-by-you
 What this needs now is strangers: your real Next.js project, your real
 components, your weird JSX, trying to break the source-edit guarantee.
 
-If you will do that — [join the alpha](alpha.md). It is small on purpose.
+If you will do that — [join the alpha](https://tally.so/r/b5YQXo). It is small on purpose.
 
 ---
 
