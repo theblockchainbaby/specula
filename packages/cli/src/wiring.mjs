@@ -13,6 +13,9 @@ import { basename, join, relative } from "node:path";
 
 const NEXT_CONFIG_NAMES = ["next.config.ts", "next.config.mjs", "next.config.js"];
 const LAYOUT_NAMES = ["layout.tsx", "layout.jsx", "layout.js"];
+// Next.js App Router supports both `app/` at the project root and `src/app/`.
+// Check both so projects using either convention work without configuration.
+const APP_DIRS = ["app", "src/app"];
 
 /** True if a `next.config` source configures the Specula SWC plugin. */
 export function configHasPlugin(source) {
@@ -33,11 +36,13 @@ export function findNextConfig(projectRoot) {
   return null;
 }
 
-/** The App Router root layout (`app/layout.*`), or `null`. */
+/** The App Router root layout (`app/layout.*` or `src/app/layout.*`), or `null`. */
 export function findRootLayout(projectRoot) {
-  for (const name of LAYOUT_NAMES) {
-    const candidate = join(projectRoot, "app", name);
-    if (existsSync(candidate)) return candidate;
+  for (const appDir of APP_DIRS) {
+    for (const name of LAYOUT_NAMES) {
+      const candidate = join(projectRoot, appDir, name);
+      if (existsSync(candidate)) return candidate;
+    }
   }
   return null;
 }
@@ -63,7 +68,7 @@ export function checkWiring(projectRoot) {
   const layout = findRootLayout(projectRoot);
   if (!layout) {
     problems.push(
-      "no app/layout.{tsx,jsx,js} found — Specula v1 needs the Next.js App Router",
+      "no app/layout.{tsx,jsx,js} or src/app/layout.{tsx,jsx,js} found — Specula v1 needs the Next.js App Router",
     );
   } else if (!layoutHasOverlay(readFileSync(layout, "utf8"))) {
     problems.push(

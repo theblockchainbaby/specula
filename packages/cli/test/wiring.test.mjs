@@ -51,15 +51,19 @@ const WIRED_CONFIG = `export default {
 const WIRED_LAYOUT =
   "<script src={`http://127.0.0.1:${port}/specula.js`} async />";
 
-/** A throwaway project; pass `null` to omit the next.config or the layout. */
-function project(configSource, layoutSource) {
+/**
+ * A throwaway project; pass `null` to omit the next.config or the layout.
+ * `appDir` defaults to "app" (the classic root convention); pass "src/app"
+ * to exercise the equally common `src/`-prefixed layout.
+ */
+function project(configSource, layoutSource, appDir = "app") {
   const root = mkdtempSync(join(tmpdir(), "specula-wiring-"));
   if (configSource !== null) {
     writeFileSync(join(root, "next.config.mjs"), configSource, "utf8");
   }
   if (layoutSource !== null) {
-    mkdirSync(join(root, "app"));
-    writeFileSync(join(root, "app", "layout.tsx"), layoutSource, "utf8");
+    mkdirSync(join(root, appDir), { recursive: true });
+    writeFileSync(join(root, appDir, "layout.tsx"), layoutSource, "utf8");
   }
   return root;
 }
@@ -90,6 +94,15 @@ test("checkWiring reports an unconfigured SWC plugin", () => {
     const result = checkWiring(root);
     assert.equal(result.ok, false);
     assert.match(result.problems.join("\n"), /SWC plugin/);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("checkWiring passes a wired project that uses the src/app convention", () => {
+  const root = project(WIRED_CONFIG, WIRED_LAYOUT, "src/app");
+  try {
+    assert.deepEqual(checkWiring(root), { ok: true, problems: [] });
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
