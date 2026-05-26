@@ -11,14 +11,17 @@ target/
 .swc/
 next-env.d.ts
 
-# media — host launch videos elsewhere, don't commit them
+# media — host launch video/audio elsewhere, don't commit them
 *.webm
+*.mp4
+*.mp3
 
 # alpha operator docs — kept local, not in the public repo
 docs/alpha-recruitment.md
 docs/alpha-runbook.md
 docs/alpha-experiment.md
 docs/demo-script.md
+docs/demo-script.pdf
 
 # os / logs
 .DS_Store
