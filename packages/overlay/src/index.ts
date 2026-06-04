@@ -24,6 +24,7 @@ import {
 import { connect } from "./client.js";
 import { Inspector, INSPECTOR_ID } from "./inspector.js";
 import type { SelectOk } from "./inspector.js";
+import { installDragReorder } from "./drag.js";
 import { installKeyboardShortcuts } from "./keyboard.js";
 import { installArrowKeyNudge } from "./nudge.js";
 import { OptimisticTracker, routeServerMessage } from "./optimistic.js";
@@ -225,6 +226,22 @@ export function startOverlay(config: OverlayConfig): OverlayController {
         ? { path: selected.path, instanceIndex: selected.instanceIndex }
         : null,
     getSelectedElement: () => selected?.element ?? null,
+    sendIntent,
+  });
+
+  // Drag-to-reorder: drag the selected element onto an adjacent sibling to
+  // swap them. Maps to the existing `move` verb.
+  installDragReorder(document, {
+    getSelected: () =>
+      selected
+        ? {
+            element: selected.element,
+            selection: {
+              path: selected.path,
+              instanceIndex: selected.instanceIndex,
+            },
+          }
+        : null,
     sendIntent,
   });
 

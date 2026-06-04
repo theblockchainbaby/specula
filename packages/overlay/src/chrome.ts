@@ -20,12 +20,29 @@ const SELECTION_ID = "specula-selection-box";
 const HOVER_ID = "specula-hover-box";
 const CHIP_ID = "specula-status-chip";
 
+// Tracks each draggable mutation we make so clearSelection can restore the
+// element's original draggable attribute exactly.
+let priorDraggable: { element: Element; value: string | null } | null = null;
+
 /** Draw (or move) the selection box over `element`. */
 export function drawSelection(element: Element): void {
   const box = ensureBox(element.ownerDocument, SELECTION_ID);
   positionBox(box, element);
   setLabel(box, element.tagName.toLowerCase(), false);
   box.style.display = "block";
+  // Make the selected element draggable so HTML5 drag fires for drag-reorder.
+  // Remember the previous value so we can restore it byte-for-byte on
+  // deselect — same minimal-side-effect guarantee as everything else.
+  if (priorDraggable?.element !== element) {
+    if (priorDraggable) {
+      restoreDraggable(priorDraggable);
+    }
+    priorDraggable = {
+      element,
+      value: element.getAttribute("draggable"),
+    };
+    element.setAttribute("draggable", "true");
+  }
 }
 
 /** Hide the selection box and reset its transaction state. */
@@ -34,6 +51,21 @@ export function clearSelection(doc: Document = document): void {
   if (box) {
     box.style.display = "none";
     box.dataset.state = "idle";
+  }
+  if (priorDraggable) {
+    restoreDraggable(priorDraggable);
+    priorDraggable = null;
+  }
+}
+
+function restoreDraggable(prior: {
+  element: Element;
+  value: string | null;
+}): void {
+  if (prior.value === null) {
+    prior.element.removeAttribute("draggable");
+  } else {
+    prior.element.setAttribute("draggable", prior.value);
   }
 }
 
