@@ -24,6 +24,7 @@ import {
 import { connect } from "./client.js";
 import { Inspector, INSPECTOR_ID } from "./inspector.js";
 import type { SelectOk } from "./inspector.js";
+import { installKeyboardShortcuts } from "./keyboard.js";
 import { OptimisticTracker, routeServerMessage } from "./optimistic.js";
 import { findInstance } from "./patch.js";
 import { hitTest } from "./resolve.js";
@@ -200,6 +201,21 @@ export function startOverlay(config: OverlayConfig): OverlayController {
     drawHover(hit.element);
   });
   document.addEventListener("pointerleave", () => clearHover());
+
+  // Keyboard shortcuts: d/Del/Backspace/Esc/t/c on the current selection.
+  installKeyboardShortcuts(document, {
+    getSelection: () =>
+      selected
+        ? { path: selected.path, instanceIndex: selected.instanceIndex }
+        : null,
+    sendIntent,
+    deselect: () => {
+      selected = null;
+      clearSelection();
+      inspector.hide();
+    },
+    inspectorRoot: () => document.getElementById(INSPECTOR_ID),
+  });
 
   // Keep the selection chrome aligned when the layout shifts.
   const realign = (): void => {
