@@ -370,7 +370,12 @@ export class Inspector {
     const add = (
       key: string,
       label: string,
-      options: { danger?: boolean; disabled?: boolean; onClick: () => void },
+      options: {
+        danger?: boolean;
+        disabled?: boolean;
+        onClick: () => void;
+        disabledHint?: string;
+      },
     ): void => {
       const button = this.#el(
         "button",
@@ -381,6 +386,7 @@ export class Inspector {
       button.dataset.speculaAction = key;
       if (options.disabled) {
         button.disabled = true;
+        if (options.disabledHint) button.title = options.disabledHint;
       } else {
         button.addEventListener("click", options.onClick);
       }
@@ -398,9 +404,13 @@ export class Inspector {
       onClick: () => this.#emit(wrapElement(selection, "div")),
     });
     // Unwrap is the inverse of Wrap. Enabled only when there's something
-    // inside to keep after the wrapper is removed.
+    // inside to keep after the wrapper is removed. When disabled, the
+    // tooltip tells testers what to do next (the most common case: they
+    // selected an inner leaf instead of the wrapping element).
     add("unwrap", "Unwrap", {
       disabled: !element || element.children.length === 0,
+      disabledHint:
+        "Nothing inside to keep — select the wrapping element via the ladder above to unwrap it.",
       onClick: () => this.#emit(unwrapElement(selection)),
     });
     // Toggle the test of a `{… && <element>}` conditional. The button is
