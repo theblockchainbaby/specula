@@ -160,6 +160,54 @@ test("the Unwrap button is disabled when the element has no children", () => {
   assert.equal(unwrap.disabled, true);
 });
 
+test("scrolling up on a scrubbable class chip emits set-class with the next value", () => {
+  const { document, intents, inspector } = setup();
+  inspector.show({
+    selection: SELECTION,
+    editable: { classes: { base: ["mt-8"] } },
+  });
+  const chip = document.querySelector<HTMLElement>(
+    '[data-specula-class="mt-8"]',
+  );
+  assert.ok(chip);
+  // Wheel up = negative deltaY. One full notch is ~30px; send enough to fire.
+  const window = (document as Document & { defaultView: Window }).defaultView!;
+  chip.dispatchEvent(
+    new window.WheelEvent("wheel", {
+      deltaY: -40,
+      bubbles: true,
+      cancelable: true,
+    }),
+  );
+  assert.equal(intents.length, 1);
+  assert.equal(intents[0]?.verb, "set-class");
+  if (intents[0]?.verb === "set-class") {
+    assert.deepEqual(intents[0].add, ["mt-9"]);
+    assert.deepEqual(intents[0].remove, ["mt-8"]);
+  }
+});
+
+test("scrolling on a non-scrubbable chip emits nothing", () => {
+  const { document, intents, inspector } = setup();
+  inspector.show({
+    selection: SELECTION,
+    editable: { classes: { base: ["uppercase"] } },
+  });
+  const chip = document.querySelector<HTMLElement>(
+    '[data-specula-class="uppercase"]',
+  );
+  assert.ok(chip);
+  const window = (document as Document & { defaultView: Window }).defaultView!;
+  chip.dispatchEvent(
+    new window.WheelEvent("wheel", {
+      deltaY: -40,
+      bubbles: true,
+      cancelable: true,
+    }),
+  );
+  assert.equal(intents.length, 0);
+});
+
 test("the Unwrap button emits an unwrap intent when the element has children", () => {
   const document = new JSDOM(
     `<div data-spc="page.tsx#E/div:0">` +

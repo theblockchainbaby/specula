@@ -19,6 +19,7 @@ import {
   unwrapElement,
   wrapElement,
 } from "./intent.js";
+import { bumpClass, parseScrubbable } from "./scrub.js";
 import type { Intent, Selection } from "./intent.js";
 
 /** The editable surface of a selected element — the `select-ok` payload. */
@@ -204,6 +205,11 @@ export class Inspector {
       chip.addEventListener("click", () => {
         this.#emit(setClass(selection, {}, [], [cls]));
       });
+      // Wheel scrub: scroll a chip to cycle through scrubbable values
+      // (mt-N, text-[Npx], rounded-{lg|xl|…}). Each step emits a set-class
+      // with both add and remove so the diff stays one-line. Threshold of
+      // 30px filters trackpad jitter into discrete ticks.
+      this.#installWheelScrub(chip, selection, cls);
       chips.appendChild(chip);
     }
     section.appendChild(chips);
@@ -221,6 +227,53 @@ export class Inspector {
     });
     section.appendChild(adder);
     return section;
+  }
+
+  /**
+   * Attach a wheel scrub handler to a class chip. Each ~30px of accumulated
+   * wheel travel emits one `set-class` step in the appropriate direction.
+   * The chip's current class is tracked locally because a single wheel
+   * gesture can produce many steps before the inspector re-renders.
+   */
+  #installWheelScrub(
+    chip: HTMLElement,
+    selection: Selection,
+    initialClass: string,
+  ): void {
+    const THRESHOLD = 30;
+    let currentClass = initialClass;
+    let scrubbable = parseScrubbable(currentClass);
+    let accumulated = 0;
+    chip.addEventListener("wheel", (event) => {
+      if (!scrubbable) return;
+      event.preventDefault();
+      accumulated += event.deltaY;
+      // Negative deltaY = wheel up = increase value (delta +1).
+      while (accumulated <= -THRESHOLD && scrubbable) {
+        accumulated += THRESHOLD;
+        const next = bumpClass(scrubbable, +1);
+        if (next === null) {
+          this.#emit(setClass(selection, {}, [], [currentClass]));
+          scrubbable = null;
+          break;
+        }
+        this.#emit(setClass(selection, {}, [next], [currentClass]));
+        currentClass = next;
+        scrubbable = parseScrubbable(next);
+      }
+      while (accumulated >= THRESHOLD && scrubbable) {
+        accumulated -= THRESHOLD;
+        const next = bumpClass(scrubbable, -1);
+        if (next === null) {
+          this.#emit(setClass(selection, {}, [], [currentClass]));
+          scrubbable = null;
+          break;
+        }
+        this.#emit(setClass(selection, {}, [next], [currentClass]));
+        currentClass = next;
+        scrubbable = parseScrubbable(next);
+      }
+    });
   }
 
   /** A property + value pair that emits `set-style` on Enter. */
