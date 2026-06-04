@@ -111,7 +111,7 @@ test("hide collapses the panel", () => {
 test("show renders the structural action buttons", () => {
   const { document, inspector } = setup();
   inspector.show({ selection: SELECTION, editable: {} });
-  for (const action of ["delete", "duplicate", "wrap", "up", "down"]) {
+  for (const action of ["delete", "duplicate", "wrap", "unwrap", "up", "down"]) {
     assert.ok(
       document.querySelector(
         `#specula-inspector [data-specula-action="${action}"]`,
@@ -147,6 +147,35 @@ test("the Wrap button emits a wrap intent with a div tag", () => {
     .click();
   assert.equal(intents[0]?.verb, "wrap");
   if (intents[0]?.verb === "wrap") assert.equal(intents[0].tag, "div");
+});
+
+test("the Unwrap button is disabled when the element has no children", () => {
+  const { document, inspector } = setup();
+  // No element passed → element is null → nothing inside to keep on unwrap.
+  inspector.show({ selection: SELECTION, editable: {} });
+  const unwrap = document.querySelector<HTMLButtonElement>(
+    '[data-specula-action="unwrap"]',
+  );
+  assert.ok(unwrap);
+  assert.equal(unwrap.disabled, true);
+});
+
+test("the Unwrap button emits an unwrap intent when the element has children", () => {
+  const document = new JSDOM(
+    `<div data-spc="page.tsx#E/div:0">` +
+      `<h1 data-spc="page.tsx#E/div:0/h1:0">a</h1>` +
+      `</div>`,
+  ).window.document;
+  const intents: Intent[] = [];
+  const inspector = new Inspector(document, (intent) => intents.push(intent));
+  inspector.show(
+    { selection: { path: "page.tsx#E/div:0", instanceIndex: 0 }, editable: {} },
+    document.querySelector("div"),
+  );
+  document
+    .querySelector<HTMLButtonElement>('[data-specula-action="unwrap"]')!
+    .click();
+  assert.equal(intents[0]?.verb, "unwrap");
 });
 
 test("the Up button emits a move intent swapping with the sibling", () => {

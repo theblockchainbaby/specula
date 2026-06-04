@@ -37,9 +37,15 @@ hostile tab (DNS-rebinding / CSRF-to-localhost). The daemon therefore:
 **Daemon → overlay pushes** — `intent-ack`, `intent-committed`, `intent-failed`,
 `intent-warning`, `rekey`, `file-changed`.
 
-**Reserved, not implemented in v1** — `move`, `duplicate`, `delete`, `wrap`,
-`extract-component`, `bind-data`, and the Tier D agent verbs. The envelope `v`
-field permits additive evolution without breaking older clients.
+**Structural (Tier B), implemented in v1** — `delete`, `duplicate`, `wrap`,
+`unwrap`, `move`. Tier B verbs ack without an optimistic DOM mutation (the
+overlay relies on Fast Refresh to re-render after commit). `unwrap` is the
+byte-for-byte inverse of `wrap`: wrap → unwrap is a no-op on single-child
+wrappers.
+
+**Reserved, not implemented in v1** — `extract-component`, `bind-data`, and
+the Tier D agent verbs. The envelope `v` field permits additive evolution
+without breaking older clients.
 
 ## Message schemas
 

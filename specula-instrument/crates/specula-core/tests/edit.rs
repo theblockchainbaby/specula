@@ -7,7 +7,7 @@
 
 use specula_core::{
     locate, parse_tsx, plan_attr_edit, plan_delete, plan_duplicate, plan_move, plan_text_edit,
-    plan_wrap, Splice,
+    plan_unwrap, plan_wrap, Splice,
 };
 
 /// Apply a planned splice to the source string.
@@ -150,6 +150,12 @@ fn swap(src: &str, a: &str, b: &str) -> Option<String> {
     apply(src, Some(plan_move(src, span_a, span_b)))
 }
 
+fn unwrap(src: &str, target: &str) -> Option<String> {
+    let mut parsed = parse_tsx("page.tsx", src).expect("fixture should parse");
+    let span = locate(&mut parsed.module, "page.tsx", parsed.start_pos, target)?;
+    apply(src, Some(plan_unwrap(src, span)))
+}
+
 #[test]
 fn delete_removes_the_element_and_its_line() {
     assert_eq!(
@@ -188,4 +194,21 @@ fn move_swaps_two_adjacent_siblings() {
         swap(TREE, "page.tsx#E/main:0/h1:0", "page.tsx#E/main:0/p:0").as_deref(),
         Some("export function E() {\n  return <main>\n    <p>b</p>\n    <h1>a</h1>\n  </main>;\n}\n"),
     );
+}
+
+#[test]
+fn unwrap_removes_the_wrapping_element_round_trip() {
+    // The exact output of plan_wrap on `<h1>x</h1>` — unwrap must invert it
+    // byte-for-byte so wrap→unwrap is a no-op.
+    let src = "export function E() {\n  return <div>\n    <h1>x</h1>\n  </div>;\n}\n";
+    assert_eq!(
+        unwrap(src, "page.tsx#E/div:0").as_deref(),
+        Some("export function E() {\n  return <h1>x</h1>;\n}\n"),
+    );
+}
+
+#[test]
+fn unwrap_returns_none_for_an_unknown_path() {
+    let src = "export function E() {\n  return <div>\n    <h1>x</h1>\n  </div>;\n}\n";
+    assert_eq!(unwrap(src, "page.tsx#E/section:0"), None);
 }

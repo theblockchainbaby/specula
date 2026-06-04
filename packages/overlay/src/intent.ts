@@ -99,6 +99,11 @@ export function wrapElement(selection: Selection, tag: string): Intent {
   return { ...envelope(selection), verb: "wrap", tag };
 }
 
+/** An `unwrap` intent — remove the wrapping element, keep its children. */
+export function unwrapElement(selection: Selection): Intent {
+  return { ...envelope(selection), verb: "unwrap" };
+}
+
 /** A `move` intent — swap the element with an adjacent sibling. */
 export function moveElement(selection: Selection, sibling: Selection): Intent {
   return { ...envelope(selection), verb: "move", sibling };

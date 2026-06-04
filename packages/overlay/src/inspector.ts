@@ -16,6 +16,7 @@ import {
   moveElement,
   setClass,
   setStyle,
+  unwrapElement,
   wrapElement,
 } from "./intent.js";
 import type { Intent, Selection } from "./intent.js";
@@ -341,6 +342,12 @@ export class Inspector {
     });
     add("wrap", "Wrap", {
       onClick: () => this.#emit(wrapElement(selection, "div")),
+    });
+    // Unwrap is the inverse of Wrap. Enabled only when there's something
+    // inside to keep after the wrapper is removed.
+    add("unwrap", "Unwrap", {
+      disabled: !element || element.children.length === 0,
+      onClick: () => this.#emit(unwrapElement(selection)),
     });
 
     const up = this.#sibling(element, "up");

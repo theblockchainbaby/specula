@@ -15,6 +15,7 @@ export type EditVerb =
   | "delete"
   | "duplicate"
   | "wrap"
+  | "unwrap"
   | "move";
 
 /** The JSON shape `specula-edit` emits. */

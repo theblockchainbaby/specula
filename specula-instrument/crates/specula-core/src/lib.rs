@@ -16,7 +16,7 @@ pub use emit::emit;
 pub use map::{ElementKind, Env, MapEntry};
 pub use parse::{parse_tsx, ParseError, Parsed};
 pub use path::{ElementSpan, Splice};
-pub use structural::{plan_delete, plan_duplicate, plan_move, plan_wrap};
+pub use structural::{plan_delete, plan_duplicate, plan_move, plan_unwrap, plan_wrap};
 
 pub use swc_core::ecma::ast::Module;
 

@@ -119,6 +119,31 @@ test("runEdit commits a real set-class to the file", async () => {
   }
 });
 
+test("runEdit commits an unwrap that removes the wrapping element", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "specula-edit-tx-"));
+  const file = join(dir, "page.tsx");
+  // Fixture: a <div> wrapping an <h1>. Unwrap should leave only the <h1>.
+  const wrapped =
+    "export default function Home(){return <main><div><h1>x</h1></div></main>;}";
+  writeFileSync(file, wrapped, "utf8");
+  try {
+    const result = await runEdit(
+      "page.tsx",
+      "unwrap",
+      "page.tsx#Home/main:0/div:0",
+      "",
+      deps(dir),
+    );
+    assert.equal(result.ok, true);
+    assert.equal(
+      readFileSync(file, "utf8"),
+      "export default function Home(){return <main><h1>x</h1></main>;}",
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("runEdit rolls the file back when the target is not found", async () => {
   const dir = mkdtempSync(join(tmpdir(), "specula-edit-tx-"));
   const file = join(dir, "page.tsx");

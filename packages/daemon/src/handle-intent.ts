@@ -95,6 +95,10 @@ export async function handleIntent(
       verb = "wrap";
       value = intent.tag;
       break;
+    case "unwrap":
+      verb = "unwrap";
+      value = "";
+      break;
     case "move":
       verb = "move";
       value = intent.sibling.path;

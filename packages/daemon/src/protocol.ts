@@ -127,6 +127,10 @@ export interface WrapIntent extends IntentBase {
   tag: string;
 }
 
+export interface UnwrapIntent extends IntentBase {
+  verb: "unwrap";
+}
+
 export interface MoveIntent extends IntentBase {
   verb: "move";
   /** The adjacent sibling to swap the element with. */
@@ -141,6 +145,7 @@ export type Intent =
   | DeleteIntent
   | DuplicateIntent
   | WrapIntent
+  | UnwrapIntent
   | MoveIntent;
 
 // ===== Transaction lifecycle (daemon -> overlay) =====

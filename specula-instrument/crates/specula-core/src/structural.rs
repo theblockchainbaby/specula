@@ -86,3 +86,41 @@ pub fn plan_move(source: &str, a: ElementSpan, b: ElementSpan) -> Splice {
         replacement: format!("{second_src}{between}{first_src}"),
     }
 }
+
+/// The byte offset, within `element`, of the first `>` that ends the opening
+/// JSX tag. Skips over expression containers `{…}` (which may legally contain
+/// `>` inside JSX) by tracking brace depth.
+fn opening_tag_end(element: &str) -> usize {
+    let bytes = element.as_bytes();
+    let mut i = 0;
+    let mut brace_depth: i32 = 0;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'{' => brace_depth += 1,
+            b'}' => brace_depth -= 1,
+            b'>' if brace_depth == 0 => return i + 1,
+            _ => {}
+        }
+        i += 1;
+    }
+    bytes.len()
+}
+
+/// Plan an `unwrap`: the inverse of `plan_wrap`. Replace a wrapping element
+/// with its inner content, keeping the children in place. wrap→unwrap is a
+/// round-trip no-op for single-child wrappers.
+pub fn plan_unwrap(source: &str, span: ElementSpan) -> Splice {
+    let element = &source[span.lo as usize..span.hi as usize];
+    let open_end = opening_tag_end(element);
+    let close_start = element.rfind("</").unwrap_or(element.len());
+    let inner = if open_end <= close_start {
+        &element[open_end..close_start]
+    } else {
+        ""
+    };
+    Splice {
+        start: span.lo,
+        end: span.hi,
+        replacement: inner.trim().to_string(),
+    }
+}
