@@ -20,6 +20,7 @@ import {
   unwrapElement,
   wrapElement,
 } from "./intent.js";
+import { applyReplacement, collectTextTargets } from "./replace.js";
 import { bumpClass, parseScrubbable } from "./scrub.js";
 import type { Intent, Selection } from "./intent.js";
 
@@ -100,6 +101,9 @@ export class Inspector {
       panel.appendChild(this.#assetField(selection, editable.asset.src));
     }
     panel.appendChild(this.#actionsField(selection, element));
+    if (element) {
+      panel.appendChild(this.#replaceField(element));
+    }
     panel.appendChild(this.#footer());
   }
 
@@ -473,6 +477,51 @@ export class Inspector {
       },
     });
 
+    section.appendChild(row);
+    return section;
+  }
+
+  /**
+   * Find-and-replace within the selected element's instrumented subtree.
+   * Each matching descendant fires one edit-text intent so source diffs
+   * stay reviewable per-leaf. v1: literal match, case sensitive.
+   */
+  #replaceField(element: Element): HTMLElement {
+    const section = this.#section("Replace");
+    const row = this.#el("div", "spc-input-row");
+
+    const findInput = this.#el("input", "spc-input spc-input--mono");
+    findInput.type = "text";
+    findInput.placeholder = "find";
+    findInput.dataset.speculaField = "replace-find";
+
+    const replaceInput = this.#el("input", "spc-input spc-input--mono");
+    replaceInput.type = "text";
+    replaceInput.placeholder = "replace with";
+    replaceInput.dataset.speculaField = "replace-with";
+
+    const apply = (): void => {
+      const find = findInput.value;
+      const replaceWith = replaceInput.value;
+      if (!find) return;
+      const targets = collectTextTargets(element, find);
+      for (const t of targets) {
+        const next = applyReplacement(t.currentText, find, replaceWith);
+        if (next === t.currentText) continue;
+        this.#emit(editText(t.selection, next));
+      }
+      findInput.value = "";
+      replaceInput.value = "";
+    };
+
+    findInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") apply();
+    });
+    replaceInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") apply();
+    });
+
+    row.append(findInput, replaceInput);
     section.appendChild(row);
     return section;
   }

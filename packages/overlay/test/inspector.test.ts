@@ -277,6 +277,58 @@ test("a move with no instrumented sibling emits nothing", () => {
   assert.equal(intents.length, 0);
 });
 
+// --- replace --------------------------------------------------------------
+
+test("Replace inputs render when an element is passed to show", () => {
+  const dom = new JSDOM(
+    `<main data-spc="page.tsx#E/main:0">` +
+      `<h1 data-spc="page.tsx#E/main:0/h1:0">Hello</h1>` +
+      `</main>`,
+  );
+  const inspector = new Inspector(dom.window.document, () => {});
+  inspector.show(
+    { selection: { path: "page.tsx#E/main:0", instanceIndex: 0 }, editable: {} },
+    dom.window.document.querySelector("main"),
+  );
+  assert.ok(
+    dom.window.document.querySelector(
+      '#specula-inspector input[data-specula-field="replace-find"]',
+    ),
+  );
+});
+
+test("Pressing Enter on the find input fires edit-text for each matching descendant", () => {
+  const dom = new JSDOM(
+    `<main data-spc="page.tsx#E/main:0">` +
+      `<h1 data-spc="page.tsx#E/main:0/h1:0">Hello World</h1>` +
+      `<p data-spc="page.tsx#E/main:0/p:0">Goodbye World</p>` +
+      `</main>`,
+  );
+  const intents: Intent[] = [];
+  const inspector = new Inspector(dom.window.document, (i) => intents.push(i));
+  inspector.show(
+    { selection: { path: "page.tsx#E/main:0", instanceIndex: 0 }, editable: {} },
+    dom.window.document.querySelector("main"),
+  );
+  const find = dom.window.document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="replace-find"]',
+  )!;
+  const replace = dom.window.document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="replace-with"]',
+  )!;
+  find.value = "World";
+  replace.value = "Friend";
+  find.dispatchEvent(
+    new dom.window.KeyboardEvent("keydown", { key: "Enter" }),
+  );
+  assert.equal(intents.length, 2);
+  for (const i of intents) assert.equal(i.verb, "edit-text");
+  if (intents[0].verb === "edit-text")
+    assert.equal(intents[0].text, "Hello Friend");
+  if (intents[1].verb === "edit-text")
+    assert.equal(intents[1].text, "Goodbye Friend");
+});
+
 // --- multi-select banner --------------------------------------------------
 
 test("setMultiMode appends a banner showing the count and an apply-all input", () => {
