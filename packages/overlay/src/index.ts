@@ -25,6 +25,7 @@ import { connect } from "./client.js";
 import { Inspector, INSPECTOR_ID } from "./inspector.js";
 import type { SelectOk } from "./inspector.js";
 import { installKeyboardShortcuts } from "./keyboard.js";
+import { installArrowKeyNudge } from "./nudge.js";
 import { OptimisticTracker, routeServerMessage } from "./optimistic.js";
 import { findInstance } from "./patch.js";
 import { hitTest } from "./resolve.js";
@@ -215,6 +216,16 @@ export function startOverlay(config: OverlayConfig): OverlayController {
       inspector.hide();
     },
     inspectorRoot: () => document.getElementById(INSPECTOR_ID),
+  });
+
+  // Arrow-key nudge: one Tailwind margin step per press in the arrow direction.
+  installArrowKeyNudge(document, {
+    getSelection: () =>
+      selected
+        ? { path: selected.path, instanceIndex: selected.instanceIndex }
+        : null,
+    getSelectedElement: () => selected?.element ?? null,
+    sendIntent,
   });
 
   // Keep the selection chrome aligned when the layout shifts.
