@@ -26,6 +26,7 @@ import { Inspector, INSPECTOR_ID } from "./inspector.js";
 import type { SelectOk } from "./inspector.js";
 import { installDragReorder } from "./drag.js";
 import { installKeyboardShortcuts } from "./keyboard.js";
+import { MultiSelection } from "./multiselect.js";
 import { installArrowKeyNudge } from "./nudge.js";
 import { OptimisticTracker, routeServerMessage } from "./optimistic.js";
 import { findInstance } from "./patch.js";
@@ -162,6 +163,30 @@ export function startOverlay(config: OverlayConfig): OverlayController {
     },
   );
 
+  // Multi-selection set — Cmd/Ctrl+click on instrumented elements grows it.
+  // Plain clicks reset it to the single clicked element.
+  const multi = new MultiSelection();
+  multi.subscribe(() => {
+    if (multi.size > 1) {
+      inspector.setMultiMode(multi.size, (className) => {
+        for (const sel of multi.list()) {
+          sendIntent({
+            v: 1,
+            id: crypto.randomUUID(),
+            type: "intent",
+            verb: "set-class",
+            selection: sel,
+            state: {},
+            add: [className],
+            remove: [],
+          });
+        }
+      });
+    } else {
+      inspector.clearMultiMode();
+    }
+  });
+
   document.addEventListener(
     "click",
     (event) => {
@@ -174,6 +199,7 @@ export function startOverlay(config: OverlayConfig): OverlayController {
       const hit = hitTest(target);
       if (!hit) {
         selected = null;
+        multi.clear();
         clearSelection();
         inspector.hide();
         return;
@@ -182,6 +208,16 @@ export function startOverlay(config: OverlayConfig): OverlayController {
       // Intercept the click — in the dev page a click is a selection gesture.
       event.preventDefault();
       event.stopPropagation();
+      const sel = { path: hit.path, instanceIndex: hit.instanceIndex };
+      if (event.metaKey || event.ctrlKey) {
+        multi.toggle(sel);
+        // Don't replace the primary selection in multi mode — keep the
+        // single inspector view on the most recently single-clicked one.
+        return;
+      }
+      // Plain click: reset multi to just this one and proceed with single
+      // selection as before.
+      multi.setOne(sel);
       select(hit);
     },
     true,

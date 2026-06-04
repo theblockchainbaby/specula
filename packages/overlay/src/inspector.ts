@@ -110,6 +110,44 @@ export class Inspector {
   }
 
   /**
+   * Switch to multi-select mode: append a banner showing the count plus an
+   * input that applies a class name to every element in the multi-set when
+   * the user hits Enter. The primary single-selection editor stays visible
+   * above the banner so individual edits still work on the focused element.
+   */
+  setMultiMode(count: number, applyAll: (className: string) => void): void {
+    const panel = this.#ensurePanel();
+    // Remove any previous multi-banner.
+    panel.querySelector('[data-specula-multi]')?.remove();
+    if (count <= 1) return;
+    const banner = this.#el("div", "spc-multi");
+    banner.dataset.speculaMulti = "true";
+    const label = this.#el("div", "spc-multi__label");
+    label.textContent = `${count} elements selected`;
+    const input = this.#el("input", "spc-input spc-input--mono");
+    input.type = "text";
+    input.placeholder = "add class to all…";
+    input.dataset.speculaField = "multi-add-class";
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      const value = input.value.trim();
+      if (!value) return;
+      applyAll(value);
+      input.value = "";
+    });
+    banner.append(label, input);
+    panel.appendChild(banner);
+    panel.style.display = "block";
+  }
+
+  /** Drop the multi-mode banner. Safe to call when not in multi mode. */
+  clearMultiMode(): void {
+    const panel = this.#doc.getElementById(INSPECTOR_ID);
+    if (!panel) return;
+    panel.querySelector('[data-specula-multi]')?.remove();
+  }
+
+  /**
    * Reflect a transaction's lifecycle state in the panel — the footer message,
    * the header dot, and (while `loading`) the inert overlay on the sections.
    */

@@ -277,6 +277,60 @@ test("a move with no instrumented sibling emits nothing", () => {
   assert.equal(intents.length, 0);
 });
 
+// --- multi-select banner --------------------------------------------------
+
+test("setMultiMode appends a banner showing the count and an apply-all input", () => {
+  const { document, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  inspector.setMultiMode(3, () => {});
+  const banner = document.querySelector('#specula-inspector [data-specula-multi]');
+  assert.ok(banner);
+  assert.match(banner!.textContent || "", /3 elements selected/);
+  const input = banner!.querySelector<HTMLInputElement>(
+    'input[data-specula-field="multi-add-class"]',
+  );
+  assert.ok(input);
+});
+
+test("typing a class in the multi-apply input and pressing Enter calls applyAll", () => {
+  const { document, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  const calls: string[] = [];
+  inspector.setMultiMode(2, (cls) => calls.push(cls));
+  const input = document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="multi-add-class"]',
+  )!;
+  input.value = "mt-4";
+  input.dispatchEvent(
+    new (document as Document & { defaultView: Window }).defaultView!.KeyboardEvent(
+      "keydown",
+      { key: "Enter" },
+    ),
+  );
+  assert.deepEqual(calls, ["mt-4"]);
+});
+
+test("clearMultiMode removes the banner", () => {
+  const { document, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  inspector.setMultiMode(2, () => {});
+  inspector.clearMultiMode();
+  assert.equal(
+    document.querySelector('#specula-inspector [data-specula-multi]'),
+    null,
+  );
+});
+
+test("setMultiMode with count <= 1 is a no-op", () => {
+  const { document, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  inspector.setMultiMode(1, () => {});
+  assert.equal(
+    document.querySelector('#specula-inspector [data-specula-multi]'),
+    null,
+  );
+});
+
 const LADDER = [
   { selection: { path: "page.tsx#E/main:0/h1:0", instanceIndex: 0 }, label: "h1" },
   { selection: { path: "page.tsx#E/main:0", instanceIndex: 0 }, label: "main" },
