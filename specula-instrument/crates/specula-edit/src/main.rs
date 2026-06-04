@@ -18,7 +18,7 @@ use std::process::ExitCode;
 use serde::{Deserialize, Serialize};
 use specula_core::{
     locate, parse_tsx, plan_attr_edit, plan_delete, plan_duplicate, plan_move, plan_text_edit,
-    plan_unwrap, plan_wrap, Splice,
+    plan_toggle_conditional, plan_unwrap, plan_wrap, Splice,
 };
 
 #[derive(Deserialize)]
@@ -118,6 +118,8 @@ fn plan(file: &str, request: &EditRequest) -> Result<Option<Splice>, String> {
         }
         "wrap" => locate(module, file, start, path).map(|span| plan_wrap(src, span, value)),
         "unwrap" => locate(module, file, start, path).map(|span| plan_unwrap(src, span)),
+        "toggle-conditional" => locate(module, file, start, path)
+            .and_then(|span| plan_toggle_conditional(src, span)),
         "move" => {
             match (
                 locate(module, file, start, path),

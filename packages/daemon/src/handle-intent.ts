@@ -99,6 +99,10 @@ export async function handleIntent(
       verb = "unwrap";
       value = "";
       break;
+    case "toggle-conditional":
+      verb = "toggle-conditional";
+      value = "";
+      break;
     case "move":
       verb = "move";
       value = intent.sibling.path;

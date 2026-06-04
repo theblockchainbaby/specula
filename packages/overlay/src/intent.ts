@@ -104,6 +104,11 @@ export function unwrapElement(selection: Selection): Intent {
   return { ...envelope(selection), verb: "unwrap" };
 }
 
+/** A `toggle-conditional` intent — flip `{x && <el>}` ↔ `{!x && <el>}`. */
+export function toggleConditional(selection: Selection): Intent {
+  return { ...envelope(selection), verb: "toggle-conditional" };
+}
+
 /** A `move` intent — swap the element with an adjacent sibling. */
 export function moveElement(selection: Selection, sibling: Selection): Intent {
   return { ...envelope(selection), verb: "move", sibling };

@@ -16,6 +16,7 @@ export type EditVerb =
   | "duplicate"
   | "wrap"
   | "unwrap"
+  | "toggle-conditional"
   | "move";
 
 /** The JSON shape `specula-edit` emits. */

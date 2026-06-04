@@ -16,6 +16,7 @@ import {
   moveElement,
   setClass,
   setStyle,
+  toggleConditional,
   unwrapElement,
   wrapElement,
 } from "./intent.js";
@@ -401,6 +402,12 @@ export class Inspector {
     add("unwrap", "Unwrap", {
       disabled: !element || element.children.length === 0,
       onClick: () => this.#emit(unwrapElement(selection)),
+    });
+    // Toggle the test of a `{… && <element>}` conditional. The button is
+    // always offered; the planner returns None and rolls back when the
+    // element isn't actually inside a supported conditional pattern.
+    add("toggle", "Toggle", {
+      onClick: () => this.#emit(toggleConditional(selection)),
     });
 
     const up = this.#sibling(element, "up");

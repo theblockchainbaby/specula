@@ -119,6 +119,30 @@ test("runEdit commits a real set-class to the file", async () => {
   }
 });
 
+test("runEdit commits a toggle-conditional that flips the test", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "specula-edit-tx-"));
+  const file = join(dir, "page.tsx");
+  const conditional =
+    "export default function Home({show}){return <main>{show && <h1>x</h1>}</main>;}";
+  writeFileSync(file, conditional, "utf8");
+  try {
+    const result = await runEdit(
+      "page.tsx",
+      "toggle-conditional",
+      "page.tsx#Home/main:0/h1:0",
+      "",
+      deps(dir),
+    );
+    assert.equal(result.ok, true);
+    assert.equal(
+      readFileSync(file, "utf8"),
+      "export default function Home({show}){return <main>{!show && <h1>x</h1>}</main>;}",
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("runEdit commits an unwrap that removes the wrapping element", async () => {
   const dir = mkdtempSync(join(tmpdir(), "specula-edit-tx-"));
   const file = join(dir, "page.tsx");

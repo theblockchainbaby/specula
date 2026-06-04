@@ -7,7 +7,7 @@
 
 use specula_core::{
     locate, parse_tsx, plan_attr_edit, plan_delete, plan_duplicate, plan_move, plan_text_edit,
-    plan_unwrap, plan_wrap, Splice,
+    plan_toggle_conditional, plan_unwrap, plan_wrap, Splice,
 };
 
 /// Apply a planned splice to the source string.
@@ -156,6 +156,12 @@ fn unwrap(src: &str, target: &str) -> Option<String> {
     apply(src, Some(plan_unwrap(src, span)))
 }
 
+fn toggle_conditional(src: &str, target: &str) -> Option<String> {
+    let mut parsed = parse_tsx("page.tsx", src).expect("fixture should parse");
+    let span = locate(&mut parsed.module, "page.tsx", parsed.start_pos, target)?;
+    apply(src, plan_toggle_conditional(src, span))
+}
+
 #[test]
 fn delete_removes_the_element_and_its_line() {
     assert_eq!(
@@ -194,6 +200,44 @@ fn move_swaps_two_adjacent_siblings() {
         swap(TREE, "page.tsx#E/main:0/h1:0", "page.tsx#E/main:0/p:0").as_deref(),
         Some("export function E() {\n  return <main>\n    <p>b</p>\n    <h1>a</h1>\n  </main>;\n}\n"),
     );
+}
+
+#[test]
+fn toggle_conditional_adds_a_bang_to_a_simple_identifier_test() {
+    let src =
+        "export function E() {\n  return <main>{show && <h1>x</h1>}</main>;\n}\n";
+    assert_eq!(
+        toggle_conditional(src, "page.tsx#E/main:0/h1:0").as_deref(),
+        Some("export function E() {\n  return <main>{!show && <h1>x</h1>}</main>;\n}\n"),
+    );
+}
+
+#[test]
+fn toggle_conditional_removes_a_bang_from_a_negated_test() {
+    let src =
+        "export function E() {\n  return <main>{!show && <h1>x</h1>}</main>;\n}\n";
+    assert_eq!(
+        toggle_conditional(src, "page.tsx#E/main:0/h1:0").as_deref(),
+        Some("export function E() {\n  return <main>{show && <h1>x</h1>}</main>;\n}\n"),
+    );
+}
+
+#[test]
+fn toggle_conditional_handles_member_expression_tests() {
+    let src =
+        "export function E() {\n  return <main>{user.isLoggedIn && <h1>x</h1>}</main>;\n}\n";
+    assert_eq!(
+        toggle_conditional(src, "page.tsx#E/main:0/h1:0").as_deref(),
+        Some("export function E() {\n  return <main>{!user.isLoggedIn && <h1>x</h1>}</main>;\n}\n"),
+    );
+}
+
+#[test]
+fn toggle_conditional_returns_none_when_element_is_not_in_a_conditional() {
+    // No `{… && <h1/>}` wrapping the element — the element is rendered
+    // unconditionally, so there is nothing to toggle.
+    let src = "export function E() {\n  return <main><h1>x</h1></main>;\n}\n";
+    assert_eq!(toggle_conditional(src, "page.tsx#E/main:0/h1:0"), None);
 }
 
 #[test]

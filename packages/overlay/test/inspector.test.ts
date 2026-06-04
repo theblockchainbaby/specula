@@ -111,7 +111,15 @@ test("hide collapses the panel", () => {
 test("show renders the structural action buttons", () => {
   const { document, inspector } = setup();
   inspector.show({ selection: SELECTION, editable: {} });
-  for (const action of ["delete", "duplicate", "wrap", "unwrap", "up", "down"]) {
+  for (const action of [
+    "delete",
+    "duplicate",
+    "wrap",
+    "unwrap",
+    "toggle",
+    "up",
+    "down",
+  ]) {
     assert.ok(
       document.querySelector(
         `#specula-inspector [data-specula-action="${action}"]`,
@@ -147,6 +155,15 @@ test("the Wrap button emits a wrap intent with a div tag", () => {
     .click();
   assert.equal(intents[0]?.verb, "wrap");
   if (intents[0]?.verb === "wrap") assert.equal(intents[0].tag, "div");
+});
+
+test("the Toggle button emits a toggle-conditional intent", () => {
+  const { document, intents, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  document
+    .querySelector<HTMLButtonElement>('[data-specula-action="toggle"]')!
+    .click();
+  assert.equal(intents[0]?.verb, "toggle-conditional");
 });
 
 test("the Unwrap button is disabled when the element has no children", () => {

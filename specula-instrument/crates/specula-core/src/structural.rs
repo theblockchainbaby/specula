@@ -106,6 +106,95 @@ fn opening_tag_end(element: &str) -> usize {
     bytes.len()
 }
 
+/// Plan a `toggle-conditional`: flip the test of `{test && <element>}` between
+/// `test` and `!test`. Returns `None` when the element isn't a consequent of a
+/// `… && <element>` JSX expression container, or when the test is too complex
+/// for the v1 parser (anything beyond an identifier or member-expression chain
+/// with an optional leading `!`).
+pub fn plan_toggle_conditional(source: &str, span: ElementSpan) -> Option<Splice> {
+    let bytes = source.as_bytes();
+
+    // Step 1: scan backward from the element's span.lo to find the enclosing
+    // `{` of the JSXExpressionContainer, tracking nested braces.
+    let mut i = span.lo as usize;
+    let mut depth: i32 = 0;
+    let mut found = false;
+    while i > 0 {
+        i -= 1;
+        match bytes[i] {
+            b'}' => depth += 1,
+            b'{' => {
+                if depth == 0 {
+                    found = true;
+                    break;
+                }
+                depth -= 1;
+            }
+            _ => {}
+        }
+    }
+    if !found {
+        return None;
+    }
+
+    // Step 2: skip whitespace after `{`.
+    let mut j = i + 1;
+    while j < bytes.len() && is_space(bytes[j]) {
+        j += 1;
+    }
+
+    // Step 3: optionally consume a leading `!` then any whitespace.
+    let test_start = j;
+    let has_bang = bytes.get(j) == Some(&b'!');
+    if has_bang {
+        j += 1;
+        while j < bytes.len() && is_space(bytes[j]) {
+            j += 1;
+        }
+    }
+    let identifier_start = j;
+    while j < bytes.len() && is_identifier_char(bytes[j]) {
+        j += 1;
+    }
+    if j == identifier_start {
+        return None;
+    }
+
+    // Step 4: confirm `&&` follows (with optional whitespace).
+    let mut k = j;
+    while k < bytes.len() && is_space(bytes[k]) {
+        k += 1;
+    }
+    if k + 1 >= bytes.len() || bytes[k] != b'&' || bytes[k + 1] != b'&' {
+        return None;
+    }
+
+    // Step 5: emit the splice.
+    if has_bang {
+        // Remove the leading `!` and any whitespace between it and the
+        // identifier, collapsing back to the bare test.
+        Some(Splice {
+            start: test_start as u32,
+            end: identifier_start as u32,
+            replacement: String::new(),
+        })
+    } else {
+        Some(Splice {
+            start: test_start as u32,
+            end: test_start as u32,
+            replacement: "!".to_string(),
+        })
+    }
+}
+
+fn is_space(b: u8) -> bool {
+    matches!(b, b' ' | b'\t' | b'\n' | b'\r')
+}
+
+fn is_identifier_char(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || b == b'_' || b == b'$' || b == b'.'
+}
+
 /// Plan an `unwrap`: the inverse of `plan_wrap`. Replace a wrapping element
 /// with its inner content, keeping the children in place. wrap→unwrap is a
 /// round-trip no-op for single-child wrappers.

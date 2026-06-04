@@ -131,6 +131,10 @@ export interface UnwrapIntent extends IntentBase {
   verb: "unwrap";
 }
 
+export interface ToggleConditionalIntent extends IntentBase {
+  verb: "toggle-conditional";
+}
+
 export interface MoveIntent extends IntentBase {
   verb: "move";
   /** The adjacent sibling to swap the element with. */
@@ -146,6 +150,7 @@ export type Intent =
   | DuplicateIntent
   | WrapIntent
   | UnwrapIntent
+  | ToggleConditionalIntent
   | MoveIntent;
 
 // ===== Transaction lifecycle (daemon -> overlay) =====
