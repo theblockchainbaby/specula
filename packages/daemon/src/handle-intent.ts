@@ -16,6 +16,7 @@ import { runEdit } from "./apply-edit.js";
 import type { EditOptions } from "./apply-edit.js";
 import { computeClassName } from "./class-merge.js";
 import type { EditVerb } from "./edit.js";
+import { runExtract } from "./extract.js";
 import type {
   DomMutation,
   Intent,
@@ -58,6 +59,51 @@ export async function handleIntent(
   }
 
   const { path, instanceIndex } = intent.selection;
+
+  // Extract-component is a multi-file orchestration, not a single-file
+  // splice. It bypasses the standard verb pipeline entirely. The trust
+  // invariant is preserved by runExtract's own atomic backup-and-rollback.
+  if (intent.verb === "extract-component") {
+    send(socket, {
+      v: 1,
+      id: intent.id,
+      type: "intent-ack",
+      txId,
+      tier: "B",
+      blastRadius: {
+        domInstances: 1,
+        sourceFiles: [entry.file],
+        affectedPaths: [path],
+      },
+    });
+    const result = await runExtract(entry, intent.name, options);
+    if (result.ok) {
+      // Both files changed — re-analyze the original so the source map
+      // reflects the new shape (the extracted element became `<Name />`).
+      try {
+        const refreshed = await analyzeFile(
+          options.analyzeBin,
+          entry.file,
+          await readFile(join(options.projectRoot, entry.file), "utf8"),
+        );
+        map.add(refreshed);
+      } catch {
+        /* leave map as-is on transient read/parse failure */
+      }
+      send(socket, {
+        v: 1,
+        id: intent.id,
+        type: "intent-committed",
+        txId,
+        rekey: [],
+        diff: [],
+      });
+    } else {
+      fail(socket, intent.id, txId, "internal", result.reason ?? "extract failed");
+    }
+    return;
+  }
+
   let verb: EditVerb;
   let value: string;
   let mutation: DomMutation | undefined;

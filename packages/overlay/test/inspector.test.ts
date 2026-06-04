@@ -277,6 +277,43 @@ test("a move with no instrumented sibling emits nothing", () => {
   assert.equal(intents.length, 0);
 });
 
+// --- extract-component ----------------------------------------------------
+
+test("Extract input renders and Enter fires extract-component intent", () => {
+  const { document, intents, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  const input = document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="extract-name"]',
+  );
+  assert.ok(input);
+  input.value = "Hero";
+  input.dispatchEvent(
+    new (document as Document & { defaultView: Window }).defaultView!.KeyboardEvent(
+      "keydown",
+      { key: "Enter" },
+    ),
+  );
+  assert.equal(intents[0]?.verb, "extract-component");
+  if (intents[0]?.verb === "extract-component") {
+    assert.equal(intents[0].name, "Hero");
+  }
+});
+
+test("Extract input does nothing on Enter when name is empty", () => {
+  const { document, intents, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  const input = document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="extract-name"]',
+  )!;
+  input.dispatchEvent(
+    new (document as Document & { defaultView: Window }).defaultView!.KeyboardEvent(
+      "keydown",
+      { key: "Enter" },
+    ),
+  );
+  assert.equal(intents.length, 0);
+});
+
 // --- set-prop -------------------------------------------------------------
 
 test("Prop section renders a name + value input pair", () => {

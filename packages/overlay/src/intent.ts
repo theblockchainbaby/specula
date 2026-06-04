@@ -118,6 +118,11 @@ export function setProp(
   return { ...envelope(selection), verb: "set-prop", attr, value };
 }
 
+/** An `extract-component` intent — pull the element into its own .tsx file. */
+export function extractComponent(selection: Selection, name: string): Intent {
+  return { ...envelope(selection), verb: "extract-component", name };
+}
+
 /** A `move` intent — swap the element with an adjacent sibling. */
 export function moveElement(selection: Selection, sibling: Selection): Intent {
   return { ...envelope(selection), verb: "move", sibling };

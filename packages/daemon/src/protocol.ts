@@ -143,6 +143,12 @@ export interface SetPropIntent extends IntentBase {
   value: string;
 }
 
+export interface ExtractComponentIntent extends IntentBase {
+  verb: "extract-component";
+  /** PascalCase name for the new component. */
+  name: string;
+}
+
 export interface MoveIntent extends IntentBase {
   verb: "move";
   /** The adjacent sibling to swap the element with. */
@@ -160,6 +166,7 @@ export type Intent =
   | UnwrapIntent
   | ToggleConditionalIntent
   | SetPropIntent
+  | ExtractComponentIntent
   | MoveIntent;
 
 // ===== Transaction lifecycle (daemon -> overlay) =====

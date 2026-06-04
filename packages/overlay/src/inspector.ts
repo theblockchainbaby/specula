@@ -13,6 +13,7 @@ import {
   deleteElement,
   duplicateElement,
   editText,
+  extractComponent,
   moveElement,
   setClass,
   setProp,
@@ -103,6 +104,7 @@ export class Inspector {
     }
     panel.appendChild(this.#actionsField(selection, element));
     panel.appendChild(this.#propField(selection));
+    panel.appendChild(this.#extractField(selection));
     if (element) {
       panel.appendChild(this.#replaceField(element));
     }
@@ -480,6 +482,27 @@ export class Inspector {
     });
 
     section.appendChild(row);
+    return section;
+  }
+
+  /**
+   * Extract the selected element into its own .tsx file and replace it in
+   * place with `<Name />`. PascalCase name required.
+   */
+  #extractField(selection: Selection): HTMLElement {
+    const section = this.#section("Extract");
+    const input = this.#el("input", "spc-input spc-input--mono");
+    input.type = "text";
+    input.placeholder = "ComponentName";
+    input.dataset.speculaField = "extract-name";
+    input.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter") return;
+      const name = input.value.trim();
+      if (!name) return;
+      this.#emit(extractComponent(selection, name));
+      input.value = "";
+    });
+    section.appendChild(input);
     return section;
   }
 
