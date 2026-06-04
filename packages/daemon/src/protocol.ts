@@ -135,6 +135,14 @@ export interface ToggleConditionalIntent extends IntentBase {
   verb: "toggle-conditional";
 }
 
+export interface SetPropIntent extends IntentBase {
+  verb: "set-prop";
+  /** The JSX attribute name to set (e.g. `href`, `alt`, `placeholder`). */
+  attr: string;
+  /** The new string value. */
+  value: string;
+}
+
 export interface MoveIntent extends IntentBase {
   verb: "move";
   /** The adjacent sibling to swap the element with. */
@@ -151,6 +159,7 @@ export type Intent =
   | WrapIntent
   | UnwrapIntent
   | ToggleConditionalIntent
+  | SetPropIntent
   | MoveIntent;
 
 // ===== Transaction lifecycle (daemon -> overlay) =====

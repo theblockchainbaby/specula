@@ -21,16 +21,19 @@ use specula_core::{
     plan_toggle_conditional, plan_unwrap, plan_wrap, Splice,
 };
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Default)]
 struct EditRequest {
     /// The file's current source.
     source: String,
-    /// The edit verb: `edit-text`, `set-class`, or `replace-asset`.
+    /// The edit verb: `edit-text`, `set-class`, `replace-asset`, `set-prop`, …
     verb: String,
     /// Structural path of the target element.
     path: String,
     /// The new value — the text, the final class string, or the `src`.
     value: String,
+    /// The attribute name (set-prop only). Ignored for other verbs.
+    #[serde(default)]
+    attr: String,
 }
 
 #[derive(Serialize)]
@@ -112,6 +115,12 @@ fn plan(file: &str, request: &EditRequest) -> Result<Option<Splice>, String> {
         "edit-text" => plan_text_edit(module, file, start, path, value),
         "set-class" => plan_attr_edit(module, file, start, path, "className", value),
         "replace-asset" => plan_attr_edit(module, file, start, path, "src", value),
+        "set-prop" => {
+            if request.attr.is_empty() {
+                return Err("set-prop requires the `attr` field".to_string());
+            }
+            plan_attr_edit(module, file, start, path, &request.attr, value)
+        }
         "delete" => locate(module, file, start, path).map(|span| plan_delete(src, span)),
         "duplicate" => {
             locate(module, file, start, path).map(|span| plan_duplicate(src, span))

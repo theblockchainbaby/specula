@@ -12,6 +12,7 @@ export type EditVerb =
   | "edit-text"
   | "set-class"
   | "replace-asset"
+  | "set-prop"
   | "delete"
   | "duplicate"
   | "wrap"
@@ -40,6 +41,7 @@ export function applyEdit(
   verb: EditVerb,
   path: string,
   value: string,
+  attr?: string,
 ): Promise<EditResult> {
   return new Promise((resolve, reject) => {
     const child = execFile(
@@ -62,6 +64,8 @@ export function applyEdit(
         );
       },
     );
-    child.stdin?.end(JSON.stringify({ source, verb, path, value }));
+    child.stdin?.end(
+      JSON.stringify({ source, verb, path, value, ...(attr ? { attr } : {}) }),
+    );
   });
 }

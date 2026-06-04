@@ -48,6 +48,7 @@ export async function runEdit(
   targetPath: string,
   value: string,
   options: EditOptions,
+  attr?: string,
 ): Promise<TxResult> {
   const absolute = join(options.projectRoot, file);
   const source = await readFile(absolute, "utf8");
@@ -62,6 +63,7 @@ export async function runEdit(
           verb,
           targetPath,
           value,
+          attr,
         );
         if (!result.ok || result.source === undefined) {
           throw new Error(result.reason ?? `${verb} was refused`);

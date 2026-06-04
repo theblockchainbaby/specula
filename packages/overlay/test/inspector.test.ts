@@ -277,6 +277,59 @@ test("a move with no instrumented sibling emits nothing", () => {
   assert.equal(intents.length, 0);
 });
 
+// --- set-prop -------------------------------------------------------------
+
+test("Prop section renders a name + value input pair", () => {
+  const { document, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  assert.ok(
+    document.querySelector('input[data-specula-field="prop-name"]'),
+  );
+  assert.ok(
+    document.querySelector('input[data-specula-field="prop-value"]'),
+  );
+});
+
+test("Typing a prop name + value and pressing Enter emits a set-prop intent", () => {
+  const { document, intents, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  const nameInput = document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="prop-name"]',
+  )!;
+  const valueInput = document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="prop-value"]',
+  )!;
+  nameInput.value = "href";
+  valueInput.value = "/about";
+  valueInput.dispatchEvent(
+    new (document as Document & { defaultView: Window }).defaultView!.KeyboardEvent(
+      "keydown",
+      { key: "Enter" },
+    ),
+  );
+  assert.equal(intents[0]?.verb, "set-prop");
+  if (intents[0]?.verb === "set-prop") {
+    assert.equal(intents[0].attr, "href");
+    assert.equal(intents[0].value, "/about");
+  }
+});
+
+test("Empty prop name on Enter emits no intent", () => {
+  const { document, intents, inspector } = setup();
+  inspector.show({ selection: SELECTION, editable: {} });
+  const valueInput = document.querySelector<HTMLInputElement>(
+    'input[data-specula-field="prop-value"]',
+  )!;
+  valueInput.value = "/about";
+  valueInput.dispatchEvent(
+    new (document as Document & { defaultView: Window }).defaultView!.KeyboardEvent(
+      "keydown",
+      { key: "Enter" },
+    ),
+  );
+  assert.equal(intents.length, 0);
+});
+
 // --- replace --------------------------------------------------------------
 
 test("Replace inputs render when an element is passed to show", () => {

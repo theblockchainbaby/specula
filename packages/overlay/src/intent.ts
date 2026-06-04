@@ -109,6 +109,15 @@ export function toggleConditional(selection: Selection): Intent {
   return { ...envelope(selection), verb: "toggle-conditional" };
 }
 
+/** A `set-prop` intent — set an arbitrary JSX attribute's literal value. */
+export function setProp(
+  selection: Selection,
+  attr: string,
+  value: string,
+): Intent {
+  return { ...envelope(selection), verb: "set-prop", attr, value };
+}
+
 /** A `move` intent — swap the element with an adjacent sibling. */
 export function moveElement(selection: Selection, sibling: Selection): Intent {
   return { ...envelope(selection), verb: "move", sibling };

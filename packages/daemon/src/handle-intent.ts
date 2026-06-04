@@ -103,6 +103,10 @@ export async function handleIntent(
       verb = "toggle-conditional";
       value = "";
       break;
+    case "set-prop":
+      verb = "set-prop";
+      value = intent.value;
+      break;
     case "move":
       verb = "move";
       value = intent.sibling.path;
@@ -141,7 +145,8 @@ export async function handleIntent(
   }
   send(socket, ack);
 
-  const result = await runEdit(entry.file, verb, path, value, options);
+  const attr = intent.verb === "set-prop" ? intent.attr : undefined;
+  const result = await runEdit(entry.file, verb, path, value, options, attr);
   if (result.ok) {
     // The file changed — refresh its slice of the source map so later
     // selections and edits resolve against current paths.

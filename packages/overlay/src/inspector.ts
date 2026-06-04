@@ -15,6 +15,7 @@ import {
   editText,
   moveElement,
   setClass,
+  setProp,
   setStyle,
   toggleConditional,
   unwrapElement,
@@ -101,6 +102,7 @@ export class Inspector {
       panel.appendChild(this.#assetField(selection, editable.asset.src));
     }
     panel.appendChild(this.#actionsField(selection, element));
+    panel.appendChild(this.#propField(selection));
     if (element) {
       panel.appendChild(this.#replaceField(element));
     }
@@ -477,6 +479,43 @@ export class Inspector {
       },
     });
 
+    section.appendChild(row);
+    return section;
+  }
+
+  /**
+   * Set an existing JSX attribute's literal value on the selected element.
+   * v1 only edits attributes that already exist in source — the Rust planner
+   * `plan_attr_edit` returns None for missing attributes. Use this to change
+   * an `<Image src=…>`, a `<Link href=…>`, a `<MyButton variant=…>`, etc.
+   */
+  #propField(selection: Selection): HTMLElement {
+    const section = this.#section("Prop");
+    const row = this.#el("div", "spc-input-row");
+
+    const nameInput = this.#el("input", "spc-input spc-input--mono spc-prop");
+    nameInput.type = "text";
+    nameInput.placeholder = "name";
+    nameInput.dataset.speculaField = "prop-name";
+
+    const valueInput = this.#el("input", "spc-input spc-input--mono spc-val");
+    valueInput.type = "text";
+    valueInput.placeholder = "value";
+    valueInput.dataset.speculaField = "prop-value";
+
+    const apply = (): void => {
+      const attr = nameInput.value.trim();
+      if (!attr) return;
+      this.#emit(setProp(selection, attr, valueInput.value));
+      nameInput.value = "";
+      valueInput.value = "";
+    };
+    for (const input of [nameInput, valueInput]) {
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") apply();
+      });
+    }
+    row.append(nameInput, valueInput);
     section.appendChild(row);
     return section;
   }

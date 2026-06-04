@@ -119,6 +119,31 @@ test("runEdit commits a real set-class to the file", async () => {
   }
 });
 
+test("runEdit commits a set-prop that updates an arbitrary attribute value", async () => {
+  const dir = mkdtempSync(join(tmpdir(), "specula-edit-tx-"));
+  const file = join(dir, "page.tsx");
+  // Fixture: a Next-style <Link href="/old"> — set-prop should rewrite href.
+  const withLink =
+    'export default function Home(){return <main><a href="/old" data-test="x">Click</a></main>;}';
+  writeFileSync(file, withLink, "utf8");
+  try {
+    const result = await runEdit(
+      "page.tsx",
+      "set-prop",
+      "page.tsx#Home/main:0/a:0",
+      "/new",
+      deps(dir),
+      "href",
+    );
+    assert.equal(result.ok, true);
+    assert.match(readFileSync(file, "utf8"), /href="\/new"/);
+    // The other attribute is untouched.
+    assert.match(readFileSync(file, "utf8"), /data-test="x"/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
 test("runEdit commits a toggle-conditional that flips the test", async () => {
   const dir = mkdtempSync(join(tmpdir(), "specula-edit-tx-"));
   const file = join(dir, "page.tsx");
