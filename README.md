@@ -10,7 +10,7 @@ comments, and every other line are preserved exactly.
 
 ## Alpha
 
-Specula is in `v1.0.0-alpha`. I am looking for Next.js developers to try the demo, make a few edits, inspect the Git diff, and tell me whether they would trust the result.
+Specula is in `v1.1.0-alpha`. I am looking for Next.js developers to try the demo, make a few edits, inspect the Git diff, and tell me whether they would trust the result. v1.1 just added six new verbs and four new modalities — arrow-key nudge, style scrubbing, drag-to-reorder, multi-select, set-prop on component instances, and extract-component (multi-file atomic transaction).
 
 Start with the demo below. If the source diff feels wrong, confusing, or unsafe, that is the most valuable feedback.
 

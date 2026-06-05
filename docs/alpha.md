@@ -3,7 +3,7 @@
 Specula is a visual source editor for Next.js. Click a live page. Edit the real
 source. Keep the diff tiny.
 
-v1.0.0-alpha is feature-complete and verified by us. The one thing it has not
+v1.1.0-alpha is feature-complete and verified by us. The one thing it has not
 had is **strangers' code** — and that is the only thing that proves it. The
 alpha is a small, hands-on experiment with a single question: can someone who
 has never seen Specula install it, edit real code, and trust the diff?

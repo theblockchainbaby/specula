@@ -3,7 +3,7 @@
 **Specula is a visual source editor for Next.js. Click a live page. Edit the
 real source. Keep the diff tiny.**
 
-*v1.0.0-alpha — an honest alpha. It needs strangers to try to break it.*
+*v1.1.0-alpha — an honest alpha. It needs strangers to try to break it.*
 
 Visual editors for real codebases tend to fail one of two ways. Either they
 **export** code — a one-way door; touch the export by hand and the tool can't
