@@ -8,6 +8,11 @@ inline style, or swap an image. Specula writes the change back to your source
 files as a *minimal diff* — only the bytes you changed move; formatting,
 comments, and every other line are preserved exactly.
 
+![Specula's inspector open over a running Next.js page: selection chrome on the heading, the dark HUD on the right showing the element's path, editable text, structure, prop, extract, and replace controls](docs/specula-screenshot.png)
+
+*The inspector, live over the bundled playground — click an element on the left,
+edit it on the right, and the source file changes underneath.*
+
 ## Alpha
 
 Specula is in `v1.1.0-alpha`. I am looking for Next.js developers to try the demo, make a few edits, inspect the Git diff, and tell me whether they would trust the result. v1.1 just added six new verbs and four new modalities — arrow-key nudge, style scrubbing, drag-to-reorder, multi-select, set-prop on component instances, and extract-component (multi-file atomic transaction).
@@ -30,20 +35,30 @@ ones**. Every edit runs as a transaction: staged, applied, gated, and
 committed or rolled back. See [`specs/`](specs/) for the frozen contracts this
 guarantee is built on.
 
-## What v1 does
+## What Specula does
 
 | Edit | Verb | How it lands |
 |---|---|---|
 | Change text | `edit-text` | Optimistic patch, then committed to source |
 | Add / remove classes | `set-class` | Tailwind-merged, optimistic, committed |
-| Set a style property | `set-style` | Lowered to a Tailwind arbitrary class |
-| Swap an image | `replace-asset` | Upload written under `public/` |
-| Delete / duplicate / wrap / move | Structural verbs | Committed; Fast Refresh re-renders |
+| Set a style property | `set-style` | Lowered to a Tailwind arbitrary class, optimistic |
+| Swap an image | `replace-asset` | Upload written under `public/`, optimistic |
+| Edit any JSX prop | `set-prop` | Any attribute — `href`, `alt`, `placeholder`… |
+| Delete / duplicate | `delete` · `duplicate` | Committed; Fast Refresh re-renders |
+| Wrap / unwrap | `wrap` · `unwrap` | `unwrap` is the byte-for-byte inverse of `wrap` |
+| Reorder up / down / drag | `move` | Swap with an adjacent sibling |
+| Flip a conditional | `toggle-conditional` | `{test && <el>}` ↔ `{!test && <el>}` |
+| Extract a component | `extract-component` | Pulled into its own `.tsx` — multi-file atomic |
 
-Property edits (the first four) are **Tier A**: the overlay patches the DOM the
-instant the daemon acknowledges, so the change is visible with zero latency
-while the real source edit runs behind it. Structural edits are **Tier B** — no
-optimistic patch; Next.js Fast Refresh re-renders them.
+The four property edits are **Tier A**: the overlay patches the DOM the instant
+the daemon acknowledges, so the change is visible with zero latency while the
+real source edit runs behind it. The structural and prop edits are **Tier B** —
+no optimistic patch; Next.js Fast Refresh re-renders them once committed.
+
+Several of these have direct gestures on the selected element: arrow keys nudge
+a Tailwind margin one step, the mouse wheel scrubs a class chip through its
+scale, drag-and-drop reorders siblings, `Cmd`+click multi-selects to apply one
+class to many, and a find/replace runs `edit-text` across the selected subtree.
 
 ## Requirements
 
