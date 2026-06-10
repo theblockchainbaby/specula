@@ -69,7 +69,10 @@ class to many, and a find/replace runs `edit-text` across the selected subtree.
   rustup target add wasm32-wasip1
   ```
 - For your own project: **Next.js 16 App Router**, the **Webpack** dev runtime
-  (`next dev --webpack`), and **Tailwind**. The bundled demo already meets this.
+  (`next dev --webpack`), and **Tailwind** — `set-class` and `set-style` edits
+  render through Tailwind. The bundled demo is a minimal Next.js 16 + Webpack
+  app without Tailwind; it's there to exercise the text and structural edits the
+  quick start below walks through.
 
 ## Quick start — the demo
 
