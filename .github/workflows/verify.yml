@@ -1,0 +1,33 @@
+# The one gate: everything `npm run verify` covers, on every push.
+# Browser e2e checks (verify:full) stay local — they need Playwright + a
+# display-capable runner and are run before tagging a release.
+name: verify
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      # rustup reads rust-toolchain.toml — exact channel plus the wasm target.
+      - name: Install Rust toolchain
+        run: rustup toolchain install
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: specula-instrument
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+      - run: npm run build
+      - run: npm run verify
