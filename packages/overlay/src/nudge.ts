@@ -99,7 +99,7 @@ export function installArrowKeyNudge(
     const remove = oldClass ? [oldClass] : [];
     if (add.length === 0 && remove.length === 0) return;
 
-    deps.sendIntent(setClass(selection, "base", add, remove));
+    deps.sendIntent(setClass(selection, {}, add, remove));
     event.preventDefault();
   });
 }

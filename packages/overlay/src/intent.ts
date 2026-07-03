@@ -45,6 +45,10 @@ export type Intent =
   | (IntentEnvelope & { verb: "delete" })
   | (IntentEnvelope & { verb: "duplicate" })
   | (IntentEnvelope & { verb: "wrap"; tag: string })
+  | (IntentEnvelope & { verb: "unwrap" })
+  | (IntentEnvelope & { verb: "toggle-conditional" })
+  | (IntentEnvelope & { verb: "set-prop"; attr: string; value: string })
+  | (IntentEnvelope & { verb: "extract-component"; name: string })
   | (IntentEnvelope & { verb: "move"; sibling: Selection });
 
 function envelope(selection: Selection): IntentEnvelope {
