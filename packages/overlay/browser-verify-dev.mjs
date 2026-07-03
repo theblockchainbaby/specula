@@ -11,6 +11,7 @@ import { dirname, join, resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { resolveNextBin } from "./next-bin.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const repoRoot = resolve(here, "../..");
@@ -72,8 +73,8 @@ try {
 
   console.log("· starting next dev…");
   next = spawn(
-    join(playground, "node_modules/.bin/next"),
-    ["dev", "--webpack", "-p", String(DEV_PORT)],
+    process.execPath,
+    [resolveNextBin(playground), "dev", "--webpack", "-p", String(DEV_PORT)],
     { cwd: playground, detached: true, stdio: "ignore" },
   );
   await waitForServer(ORIGIN, 150000);

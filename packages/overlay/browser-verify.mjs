@@ -9,11 +9,12 @@ import { dirname, resolve } from "node:path";
 import { setTimeout as sleep } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
+import { resolveNextBin } from "./next-bin.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const playground = resolve(here, "../../apps/playground");
 const overlayBundle = resolve(here, "dist/overlay.js");
-const nextBin = resolve(playground, "node_modules/.bin/next");
+const nextBin = resolveNextBin(playground);
 const PORT = 3219;
 const BASE = `http://127.0.0.1:${PORT}/`;
 
@@ -50,7 +51,7 @@ try {
   }
 
   console.log(`· starting next on ${PORT}…`);
-  server = spawn(nextBin, ["start", "-p", String(PORT)], {
+  server = spawn(process.execPath, [nextBin, "start", "-p", String(PORT)], {
     cwd: playground,
     stdio: "ignore",
     detached: true,
