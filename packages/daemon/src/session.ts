@@ -5,7 +5,7 @@
  */
 
 import { randomBytes } from "node:crypto";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { chmodSync, mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 
 /** A fresh 256-bit session token, hex-encoded. */
@@ -24,6 +24,12 @@ export function persistSession(
 ): string {
   const file = join(projectRoot, ".specula", "session");
   mkdirSync(dirname(file), { recursive: true });
-  writeFileSync(file, `${JSON.stringify({ token, port }, null, 2)}\n`, "utf8");
+  // Owner-only: the token authorizes source writes. `mode` applies only on
+  // creation, so chmod too — the file may survive from an earlier session.
+  writeFileSync(file, `${JSON.stringify({ token, port }, null, 2)}\n`, {
+    encoding: "utf8",
+    mode: 0o600,
+  });
+  chmodSync(file, 0o600);
   return file;
 }

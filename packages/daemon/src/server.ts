@@ -2,13 +2,16 @@
  * The daemon server — an HTTP server that also carries the WebSocket protocol.
  *
  * Over HTTP it serves `/specula.js` (the overlay bundle, see `http-assets.ts`).
- * Over WebSocket it speaks the intent protocol, behind two guards:
- *  1. Origin — the connection's `Origin` must be an allowed dev-server origin.
- *  2. Token  — the first message must be a `hello` carrying the session token.
+ * Over WebSocket it speaks the intent protocol, behind three guards:
+ *  1. Loopback — the server binds 127.0.0.1 only; nothing off-machine reaches it.
+ *  2. Origin — the connection's `Origin` must be an allowed dev-server origin.
+ *  3. Token  — the first message must be a `hello` carrying the session token.
  *
- * Together these block a malicious browser tab from driving the daemon.
+ * Loopback keeps the network out; origin and token block a malicious browser
+ * tab on this machine from driving the daemon.
  */
 
+import { timingSafeEqual } from "node:crypto";
 import { once } from "node:events";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
@@ -77,7 +80,7 @@ export async function startDaemon(opts: DaemonOptions): Promise<DaemonHandle> {
       }
 
       if (!authenticated) {
-        if (message.type !== "hello" || message.token !== opts.token) {
+        if (message.type !== "hello" || !tokenMatches(message.token, opts.token)) {
           socket.close(CLOSE_BAD_HANDSHAKE, "handshake failed");
           return;
         }
@@ -96,7 +99,9 @@ export async function startDaemon(opts: DaemonOptions): Promise<DaemonHandle> {
     });
   });
 
-  httpServer.listen(opts.port);
+  // Loopback only — the daemon writes source files; it must never be
+  // reachable from the network, only from this machine.
+  httpServer.listen(opts.port, "127.0.0.1");
   await once(httpServer, "listening");
 
   return {
@@ -109,6 +114,14 @@ export async function startDaemon(opts: DaemonOptions): Promise<DaemonHandle> {
         wss.close(() => httpServer.close(() => resolve()));
       }),
   };
+}
+
+/** Constant-time token comparison — a plain `!==` leaks length/prefix timing. */
+function tokenMatches(presented: unknown, expected: string): boolean {
+  if (typeof presented !== "string") return false;
+  const a = Buffer.from(presented);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 /** Serialize and send a server message over a socket. */

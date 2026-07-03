@@ -49,6 +49,26 @@ function nextMessage(socket: WebSocket): Promise<Record<string, unknown>> {
   );
 }
 
+test("binds loopback only — never a network interface", { timeout: 5000 }, async () => {
+  await withDaemon(undefined, async (handle) => {
+    const address = handle.wss.options.server?.address();
+    assert.ok(address && typeof address === "object");
+    assert.equal(address.address, "127.0.0.1");
+  });
+});
+
+test("rejects a handshake whose token is not a string", { timeout: 5000 }, async () => {
+  await withDaemon(undefined, async (handle) => {
+    const socket = connect(handle.port, ORIGIN);
+    const code = closeCode(socket);
+    await once(socket, "open");
+    socket.send(
+      JSON.stringify({ v: 1, id: "1", type: "hello", token: 12345, client: "overlay" }),
+    );
+    assert.equal(await code, 4401);
+  });
+});
+
 test("rejects a connection from a disallowed origin", { timeout: 5000 }, async () => {
   await withDaemon(undefined, async (handle) => {
     const socket = connect(handle.port, "http://evil.example");

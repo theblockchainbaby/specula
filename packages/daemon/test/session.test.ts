@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { chmodSync, mkdtempSync, readFileSync, rmSync, statSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { generateToken, persistSession } from "../src/session.js";
@@ -23,6 +23,21 @@ test("persistSession writes a readable session file with token and port", () => 
     };
     assert.equal(parsed.token, token);
     assert.equal(parsed.port, 4123);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("persistSession writes the session file owner-only (0600)", () => {
+  const root = mkdtempSync(join(tmpdir(), "specula-session-"));
+  try {
+    const file = persistSession(root, generateToken(), 4123);
+    assert.equal(statSync(file).mode & 0o777, 0o600);
+
+    // Re-persisting over a file left loose by an earlier version tightens it.
+    chmodSync(file, 0o644);
+    persistSession(root, generateToken(), 4124);
+    assert.equal(statSync(file).mode & 0o777, 0o600);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
